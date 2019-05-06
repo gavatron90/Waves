@@ -413,7 +413,7 @@ case class DebugApiRoute(ws: WavesSettings,
                                                limit,
                                                afterOpt.flatMap(str => Base58.tryDecodeWithLimit(str).map(ByteStr(_)).toOption)))
               .left
-              .map(GenericError(_): ValidationError)
+              .map(GenericError(_))
             jsons <- txs
               .map {
                 case (height, tx: InvokeScriptTransaction) =>
