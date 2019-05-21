@@ -426,6 +426,7 @@ object WavesContext {
     lazy val functions = Array(
       txByIdF,
       txHeightByIdF,
+      blockInfoByHeightF,
       getIntegerFromStateF,
       getBooleanFromStateF,
       getBinaryFromStateF,

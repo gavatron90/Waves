@@ -35,7 +35,7 @@ val versionSource = Def.task {
 resolvers ++= Seq(
   Resolver.bintrayRepo("ethereum", "maven"),
   Resolver.bintrayRepo("dnvriend", "maven"),
-  Resolver.sbtPluginRepo("releases")
+  Resolver.sbtPluginRepo("releases"),
 )
 
 libraryDependencies ++= Dependencies.node.value
