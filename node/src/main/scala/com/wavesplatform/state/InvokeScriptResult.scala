@@ -48,8 +48,8 @@ object InvokeScriptResult {
 
   def toPB(isr: InvokeScriptResult): PBInvokeScriptResult = {
     PBInvokeScriptResult(
-      isr.dataEntries.map(PBTransactions.toPBDataEntry),
-      isr.payments.map(
+      isr.data.map(PBTransactions.toPBDataEntry),
+      isr.transfers.map(
         payment =>
           PBInvokeScriptResult.Payment(
             ByteString.copyFrom(payment.address.bytes),

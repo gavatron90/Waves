@@ -1,0 +1,76 @@
+{-# STDLIB_VERSION 3 #-}
+{-# CONTENT_TYPE EXPRESSION #-}
+{-# SCRIPT_TYPE ASSET #-}
+
+@Default(i)
+func sigVer() = {
+    let pubKey = base58'5EP6CfDMZHAfK8oPWrtpMeY8KEVJQLKxkrjdi8tGhmkA'
+    let proof = base58'5NCjvc1pCbdkNxX2d82tdBdr1Qk2aY6GhkbRwfQyf6AC4xLPNQd55pdFXFtJnZpU1pdmY3qgEhLKpD27GsEv2Uf'
+    let pmt = i.payment.extract()
+    ScriptResult(
+    WriteSet([DataEntry("result",sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    && sigVerify(getBinaryValue(this,"source"),proof,pubKey)
+    )]),
+    TransferSet([
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId),
+    ScriptTransfer(i.caller, 10, pmt.assetId)] )
+    )
+
+}
+@Verifier(tx)
+func v() = {
+    true
+}

@@ -46,6 +46,11 @@ object CompiledScript {
   implicit val compiledScriptFormat: Format[CompiledScript] = Json.format
 }
 
+case class DecompiledScript(script: String)
+object DecompiledScript {
+  implicit val decompiledScriptFormat: Format[DecompiledScript] = Json.format
+}
+
 case class FullAssetInfo(assetId: String,
                          balance: Long,
                          reissuable: Boolean,
@@ -200,6 +205,11 @@ object MatcherMessage {
 case class MatcherResponse(status: String, message: MatcherMessage)
 object MatcherResponse {
   implicit val matcherResponseFormat: Format[MatcherResponse] = Json.format
+}
+
+case class RatesResponse(message: String)
+object RatesResponse {
+  implicit val format: Format[RatesResponse] = Json.format
 }
 
 case class MatcherErrorResponse(status: Option[String], message: Option[String])

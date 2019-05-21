@@ -73,7 +73,7 @@ object InvokeScriptTransactionDiff {
             .combineAll(
               Seq(
                 PureContext.build(V3),
-                CryptoContext.build(Global),
+                CryptoContext.build(Global, V3),
                 WavesContext.build(directives, environment)
               )
             )
@@ -139,7 +139,7 @@ object InvokeScriptTransactionDiff {
               })
               dAppAddress <- TracedResult(dAppAddressEi)
               wavesFee = feeInfo._1
-              dataAndPaymentDiff <- TracedResult(payableAndDataPart(height, tx, dataEntries, feeInfo._2))
+              dataAndPaymentDiff <- TracedResult(payableAndDataPart(height, tx, dAppAddress, dataEntries, feeInfo._2))
               _                  <- TracedResult(Either.cond(pmts.flatMap(_.values).flatMap(_.values).forall(_ >= 0), (), NegativeAmount(-42, "")))
               _ <- TracedResult(
                 validateOverflow(pmts.flatMap(_.values).flatMap(_.values), "Attempt to transfer unavailable funds in contract payment"))
@@ -189,8 +189,8 @@ object InvokeScriptTransactionDiff {
                 .combineAll(pmts)
                 .mapValues(mp => mp.toList.map(x => Portfolio.build(Asset.fromCompatId(x._1), x._2)))
                 .mapValues(l => Monoid.combineAll(l))
-              val paymentFromContractMap = Map(tx.dappAddress -> Monoid.combineAll(paymentReceiversMap.values).negate)
-              val transfers = Monoid.combineAll(Seq(paymentReceiversMap, paymentFromContractMap))
+              val paymentFromContractMap = Map(dAppAddress -> Monoid.combineAll(paymentReceiversMap.values).negate)
+              val transfers              = Monoid.combineAll(Seq(paymentReceiversMap, paymentFromContractMap))
               val isr = InvokeScriptResult(data = dataEntries, transfers = paymentReceiversMap.toVector.flatMap { case (addr, pf) => InvokeScriptResult.paymentsFromPortfolio(addr, pf) })
               dataAndPaymentDiff.copy(scriptsRun = scriptsInvoked + 1) |+| Diff.stateOps(portfolios = transfers, scriptResults = Map(tx.id() -> isr))
             }
@@ -200,7 +200,11 @@ object InvokeScriptTransactionDiff {
     }
   }
 
-  private def payableAndDataPart(height: Int, tx: InvokeScriptTransaction, dataEntries: List[DataEntry[_]], feePart: Map[Address, Portfolio]) = {
+  private def payableAndDataPart(height: Int,
+                                 tx: InvokeScriptTransaction,
+                                 dAppAddress: Address,
+                                 dataEntries: List[DataEntry[_]],
+                                 feePart: Map[Address, Portfolio]) = {
     if (dataEntries.length > ContractLimits.MaxWriteSetSize) {
       Left(GenericError(s"WriteSet can't contain more than ${ContractLimits.MaxWriteSetSize} entries"))
     } else if (dataEntries.exists(_.key.getBytes().length > ContractLimits.MaxKeySizeInBytes)) {
@@ -229,7 +233,7 @@ object InvokeScriptTransactionDiff {
             height = height,
             tx = tx,
             portfolios = feePart combine payablePart,
-            accountData = Map(tx.dappAddress -> AccountDataInfo(dataEntries.map(d => d.key -> d).toMap))
+            accountData = Map(dAppAddress -> AccountDataInfo(dataEntries.map(d => d.key -> d).toMap))
           )
         )
       } else
@@ -290,23 +294,21 @@ object InvokeScriptTransactionDiff {
       nextDiff: Diff,
       script: Script): Either[ValidationError, Diff] = {
     Try {
-      stats.assetScriptExecution.measureForType(InvokeScriptTransaction.typeId)(
-        ScriptRunner(
-          blockchain.height,
-          Coproduct[TxOrd](
-            ScriptTransfer(
-              asset,
-              Recipient.Address(tx.dappAddress.bytes),
-              Recipient.Address(addressRepr.bytes),
-              amount,
-              tx.timestamp,
-              tx.id()
+      ScriptRunner(
+        blockchain.height,
+        Coproduct[TxOrd](
+          ScriptTransfer(
+            asset,
+            Recipient.Address(tx.dAppAddressOrAlias.bytes),
+            Recipient.Address(addressRepr.bytes),
+            amount,
+            tx.timestamp,
+            tx.id()
           )),
-          CompositeBlockchain.composite(blockchain, totalDiff),
-          script,
-          isAssetScript = true,
-          tx.dappAddress.bytes
-        )
+        CompositeBlockchain.composite(blockchain, totalDiff),
+        script,
+        isAssetScript = true,
+        tx.dAppAddressOrAlias.bytes
       ) match {
         case (log, Left(error))  => Left(ScriptExecutionError(error, log, isAssetScript = true))
         case (log, Right(FALSE)) => Left(TransactionNotAllowedByScript(log, isAssetScript = true))

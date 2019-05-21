@@ -1,0 +1,15 @@
+{-# STDLIB_VERSION 3 #-}
+{-# CONTENT_TYPE EXPRESSION #-}
+{-# SCRIPT_TYPE ASSET #-}
+let scAddress = Address(base58'3FZPnn8wzFgZ29VeXAFirRDjw54ScwpR7mh')
+let pubKey = base58'AiUvE65RN7qjJtmz8dAPunBqHFKd7s5EawmBCZEBFYaf'
+let proof = base58'4kQr7oDsxhduTC1Qy14X8wh375MUDZqU24979jjvE5qXr4K4RpikXuPaon2UPPspqZv9hAvdSxKH1L2fCFdnkn8U'
+sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)
+&& sigVerify(getBinaryValue(scAddress,"source"),proof,pubKey)

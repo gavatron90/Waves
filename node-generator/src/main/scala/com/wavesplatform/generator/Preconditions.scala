@@ -3,11 +3,11 @@ package com.wavesplatform.generator
 import java.nio.file.{Files, Paths}
 
 import com.typesafe.config.Config
-import com.wavesplatform.account.{Address, AddressScheme, KeyPair}
+import com.wavesplatform.account.{Address, AddressScheme, Alias, KeyPair}
 import com.wavesplatform.common.utils.EitherExt2
 import com.wavesplatform.lang.script.Script
 import com.wavesplatform.transaction.Asset.Waves
-import com.wavesplatform.transaction.Transaction
+import com.wavesplatform.transaction.{CreateAliasTransactionV2, Transaction}
 import com.wavesplatform.transaction.assets.{IssueTransaction, IssueTransactionV2}
 import com.wavesplatform.transaction.lease.{LeaseTransaction, LeaseTransactionV2}
 import com.wavesplatform.transaction.smart.SetScriptTransaction
@@ -82,8 +82,10 @@ object Preconditions {
                 val Right(tx)          = SetScriptTransaction.selfSigned(acc, Some(script), Fee, time.correctedTime())
                 (script, tx)
               }
-
-              val addTxs = List(transferTx) ++ scriptAndTx.map(_._2)
+//              val aliasTx = CreateAliasTransactionV2
+//                .selfSigned(acc, Alias.fromString(s"alias:${AddressScheme.current.chainId.toChar}:finloadsig").explicitGet(), Fee,time.correctedTime())
+//                .explicitGet()
+              val addTxs = List(transferTx/*, aliasTx*/) ++ scriptAndTx.map(_._2)
               (uni.copy(accounts = CreatedAccount(acc, balance, scriptAndTx.map(_._1)) :: uni.accounts), addTxs ::: txs)
           }
       }
