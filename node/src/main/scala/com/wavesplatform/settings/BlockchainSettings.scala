@@ -5,9 +5,8 @@ import cats.syntax.traverse.*
 import com.typesafe.config.Config
 import com.wavesplatform.account.Address
 import com.wavesplatform.common.state.ByteStr
-import net.ceedubs.ficus.Ficus.*
-import net.ceedubs.ficus.readers.ArbitraryTypeReader.*
-import net.ceedubs.ficus.readers.ValueReader
+import pureconfig.*
+import pureconfig.generic.auto.*
 
 import scala.concurrent.duration.*
 
@@ -245,35 +244,31 @@ private[settings] object BlockchainType {
 }
 
 object BlockchainSettings {
-  implicit val valueReader: ValueReader[BlockchainSettings] =
-    (cfg: Config, path: String) => fromConfig(cfg.getConfig(path))
+  def fromRootConfig(config: Config): BlockchainSettings =
+    ConfigSource.fromConfig(config).at("waves.blockchain").loadOrThrow[BlockchainSettings]
 
-  // @deprecated("Use config.as[BlockchainSettings]", "0.17.0")
-  def fromRootConfig(config: Config): BlockchainSettings = config.as[BlockchainSettings]("waves.blockchain")
+  implicit val configReader: ConfigReader[BlockchainSettings] = ConfigReader.fromCursor(cur =>
+    for {
+      objCur               <- cur.asObjectCursor
+      blockchainTypeString <- objCur.atKey("type").flatMap(_.asString).map(_.toUpperCase)
+      (addressSchemeCharacter, functionalitySettings, genesisSettings, rewardsSettings) <- blockchainTypeString match {
+        case BlockchainType.STAGENET => Right(('S', FunctionalitySettings.STAGENET, GenesisSettings.STAGENET, RewardsSettings.STAGENET))
+        case BlockchainType.TESTNET  => Right(('T', FunctionalitySettings.TESTNET, GenesisSettings.TESTNET, RewardsSettings.TESTNET))
+        case BlockchainType.MAINNET  => Right(('W', FunctionalitySettings.MAINNET, GenesisSettings.MAINNET, RewardsSettings.MAINNET))
+        case _                       =>
+          // Custom
+          for {
+            customObjCur  <- objCur.atKey("custom").flatMap(_.asObjectCursor)
+            networkId     <- customObjCur.atKey("address-scheme-character").flatMap(_.asString).map(_.charAt(0))
+            functionality <- customObjCur.atKey("functionality").flatMap(ConfigReader[FunctionalitySettings].from)
+            genesis       <- customObjCur.atKey("genesis").flatMap(ConfigReader[GenesisSettings].from)
+            rewards       <- customObjCur.atKey("rewards").flatMap(ConfigReader[RewardsSettings].from)
+          } yield {
+            require(functionality.minBlockTime <= genesis.averageBlockDelay, "minBlockTime should be <= averageBlockDelay")
+            (networkId, functionality, genesis, rewards)
+          }
+      }
 
-  private[this] def fromConfig(config: Config): BlockchainSettings = {
-    val blockchainType = config.as[String]("type").toUpperCase
-    val (addressSchemeCharacter, functionalitySettings, genesisSettings, rewardsSettings) = blockchainType match {
-      case BlockchainType.STAGENET =>
-        ('S', FunctionalitySettings.STAGENET, GenesisSettings.STAGENET, RewardsSettings.STAGENET)
-      case BlockchainType.TESTNET =>
-        ('T', FunctionalitySettings.TESTNET, GenesisSettings.TESTNET, RewardsSettings.TESTNET)
-      case BlockchainType.MAINNET =>
-        ('W', FunctionalitySettings.MAINNET, GenesisSettings.MAINNET, RewardsSettings.MAINNET)
-      case _ => // Custom
-        val networkId     = config.as[String](s"custom.address-scheme-character").charAt(0)
-        val functionality = config.as[FunctionalitySettings](s"custom.functionality")
-        val genesis       = config.as[GenesisSettings](s"custom.genesis")
-        val rewards       = config.as[RewardsSettings](s"custom.rewards")
-        require(functionality.minBlockTime <= genesis.averageBlockDelay, "minBlockTime should be <= averageBlockDelay")
-        (networkId, functionality, genesis, rewards)
-    }
-
-    BlockchainSettings(
-      addressSchemeCharacter = addressSchemeCharacter,
-      functionalitySettings = functionalitySettings,
-      genesisSettings = genesisSettings,
-      rewardsSettings = rewardsSettings
-    )
-  }
+    } yield BlockchainSettings(addressSchemeCharacter, functionalitySettings, genesisSettings, rewardsSettings)
+  )
 }
